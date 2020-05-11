@@ -10,11 +10,18 @@
 				padding: 0;
 			}
 			#app{
-				padding: 10%;
+				padding: 8%;
 			}
-			#app h2{
+			#app h3{
+				color: red;
 			}
-			
+			.Fbuttons{
+				margin-bottom: 1rem;
+			}
+			.main{
+				background-color: bisque;
+				width: 30rem;
+			}
 		</style>
 	</head>
 	<!-- 
@@ -31,13 +38,14 @@
 	<body>
 		<div id="app">
 			<h2>五指棋</h2>
+			<h3>{{victory}}</h3>
 			<div class="Fbuttons">
-				<input type="button" value="重来" class="restart" @click="" />
-				<input type="button" value="悔棋" class="regret" @click="" />
-				<input type="button" value="撤销悔棋" class="undo" @click="" />
+				<input type="button" value="重来" class="restart" @click="restartInit()" />
+				<input type="button" value="悔棋" class="regret" @click="regret()" />
+				<input type="button" value="撤销悔棋" class="undo" @click="undo()" />
 			</div>
 			<div class="main">
-				<canvas  ref="canvas" width="450" height="450"></canvas>
+				<canvas ref="canvas" width="480" height="480"></canvas>
 			</div>
 		</div>
 		<!--  -->
@@ -45,46 +53,162 @@
 			var app = new Vue({
 				el: "#app",
 				data: {
-					chess: {},
-					context: {},
+					pieceMapArr: [], //记录棋盘落子情况
+					pieceColor: ["black", "white"], //棋子颜色
+					step: 0, //记录当前步数
+					checkMode: [ //输赢检查方向模式
+						[1, 0], //水平
+						[0, 1], //竖直
+						[1, 1], //左斜线
+						[1, -1], //右斜线
+					],
+					flag: false,
+					victory: '',
+					history: [], //历史记录位置
 				},
 				mounted() {
-					this.drawChessBoard();
+					this.drawpieceBoard();
+					const canvas = this.$refs.canvas;
+					// 添加点击监听事件 
+					canvas.addEventListener("click", e => {
+						if (this.flag) {
+							alert("游戏结束,请重新开始~");
+							return;
+						}
+						//判断点击范围是否越出棋盘
+						if (e.offsetX < 25 || e.offsetX > 450 || e.offsetY < 25 || e.offsetY > 450) {
+							return;
+						}
+						let dx = Math.floor((e.offsetX + 15) / 30) * 30;
+						let dy = Math.floor((e.offsetY + 15) / 30) * 30;
+						console.log('this.pieceMapArr', this.pieceMapArr)
+						if (this.pieceMapArr[dx / 30 - 1][dy / 30 - 1] == 0) {
+
+							this.drawPiece(dx, dy, this.pieceColor[this.step % 2]); //落下棋子
+							this.pieceMapArr[dx / 30 - 1][dy / 30 - 1] = this.pieceColor[this.step % 2];
+							//历史记录位置
+							this.history.length = this.step;
+							this.history.push({
+								dx,
+								dy,
+								color: this.pieceColor[this.step % 2]								
+							});
+							//console.log(dx/30-1,dy/30-1, pieceColor[step % 2]);
+							//检查当前玩家是否赢了游戏
+							for (var i = 0; i < 4; i++) {
+								this.checkWin(dx / 30 - 1, dy / 30 - 1, this.pieceColor[this.step % 2], this.checkMode[i]);
+							}
+							this.step++;
+						}
+					});
 				},
 				methods: {
+					//重来
+					restartInit() {
+						let canvas = this.$refs.canvas
+						let context = canvas.getContext("2d");
+						context.fillStyle = "bisque";
+						context.fillRect(0, 0, canvas.width, canvas.height);
+						context.beginPath();
+						this.drawpieceBoard();
+						this.flag = false;
+					},
 					// 绘制棋盘
-					drawChessBoard() {
-						var canvas = this.$refs.canvas
+					drawpieceBoard() {
+						let canvas = this.$refs.canvas
 						// 调用canvas元素的getContext 方法访问获取2d渲染的上下文
-						var context = canvas.getContext("2d");
-						context.width = 450
+						let context = canvas.getContext("2d");
 						context.strokeStyle = '#666'
 						for (let i = 0; i < 15; i++) {
-							context.moveTo(15 + i * 30, 15)
-							context.lineTo(15 + i * 30, 435)
-							context.stroke()
-							context.moveTo(15, 15 + i * 30)
-							context.lineTo(435, 15 + i * 30)
-							context.stroke()
+							//落在方格(canvas 的宽高是450)
+							// context.moveTo(15 + i * 30, 15)
+							// context.lineTo(15 + i * 30, 435)
+							// context.stroke()
+							// context.moveTo(15, 15 + i * 30)
+							// context.lineTo(435, 15 + i * 30)
+							// context.stroke()
+							//落在交叉点(480)
+							context.beginPath();
+							context.moveTo((i + 1) * 30, 30);
+							context.lineTo((i + 1) * 30, canvas.height - 30);
+							context.closePath();
+							context.stroke();
+							context.beginPath();
+							context.moveTo(30, (i + 1) * 30);
+							context.lineTo(canvas.width - 30, (i + 1) * 30);
+							context.closePath();
+							context.stroke();
+						}
+						//初始化棋盘数组
+						for (let i = 0; i < 15; i++) {
+							this.pieceMapArr[i] = [];
+							for (let j = 0; j < 15; j++) {
+								this.pieceMapArr[i][j] = 0;
+							}
 						}
 					},
-					// 画棋盘
-					// 					Draw() {
-					// 						var canvas = document.getElementById("canvas");
-					// 						// 调用canvas元素的getContext 方法访问获取2d渲染的上下文
-					// 						var context = canvas.getContext("2d");
-					// 						context.strokeStyle = '#666'
-					// 						for (let i = 0; i < 15; i++) {
-					// 							context.moveTo(15 + i * 30, 15)
-					// 							context.lineTo(15 + i * 30, 435)
-					// 							context.stroke()
-					// 							context.moveTo(15, 15 + i * 30)
-					// 							context.lineTo(435, 15 + i * 30)
-					// 							context.stroke()
-					// 						}
-					// 
-					// 					},
-
+					//绘制棋子
+					drawPiece(x, y, color) {
+						let canvas = this.$refs.canvas
+						let context = canvas.getContext("2d");
+						context.beginPath(); //开始一条路径或重置当前的路径
+						context.arc(x, y, 15, 0, Math.PI * 2, false);
+						context.closePath();
+						context.fillStyle = color;
+						context.fill();
+					},
+					//胜负判断函数
+					checkWin(x, y, color, mode) {
+						let count = 1; //记录
+						for (let i = 1; i < 5; i++) {
+							if (this.pieceMapArr[x + i * mode[0]]) {
+								if (this.pieceMapArr[x + i * mode[0]][y + i * mode[1]] == color) {
+									count++;
+								} else {
+									break;
+								}
+							}
+						}
+						for (let j = 1; j < 5; j++) {
+							if (this.pieceMapArr[x - j * mode[0]]) {
+								if (this.pieceMapArr[x - j * mode[0]][y - j * mode[1]] == color) {
+									count++;
+								} else {
+									break;
+								}
+							}
+						}
+						if (count >= 5) {
+							if (color == 'black') {
+								this.victory = "黑子棋方胜利！";
+							} else {
+								this.victory = "白子棋方胜利！";
+							}
+							// 游戏结束
+							this.flag = true;
+						}
+					},
+					//悔棋:
+					//1.step--,2.
+					regret() {
+						if (this.history.length && !this.flag) {
+							const prev = this.history[this.step - 1];
+							console.log(prev)
+							if (prev) {
+								const {dx,dy,color} = prev;
+								// 销毁棋子
+								console.log(dx,dy,color)
+								this.minusStep(dx,dy);
+								// this.checkerboard[prev.x][prev.y] = 0
+								this.step--
+							}
+						}
+					},
+					minusStep(x,y) {
+						let {that} = this;
+						console.log('that',that)
+						console.log(x,y)
+					}
 				}
 			});
 		</script>
