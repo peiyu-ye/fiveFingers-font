@@ -81,9 +81,9 @@
 						}
 						let dx = Math.floor((e.offsetX + 15) / 30) * 30;
 						let dy = Math.floor((e.offsetY + 15) / 30) * 30;
-						console.log('this.pieceMapArr', this.pieceMapArr)
+						//console.log('this.pieceMapArr', this.pieceMapArr)
 						if (this.pieceMapArr[dx / 30 - 1][dy / 30 - 1] == 0) {
-
+							console.log('落下棋子', dx, dy, this.pieceColor[this.step % 2])
 							this.drawPiece(dx, dy, this.pieceColor[this.step % 2]); //落下棋子
 							this.pieceMapArr[dx / 30 - 1][dy / 30 - 1] = this.pieceColor[this.step % 2];
 							//历史记录位置
@@ -93,7 +93,7 @@
 								dy,
 								color: this.pieceColor[this.step % 2]								
 							});
-							//console.log(dx/30-1,dy/30-1, pieceColor[step % 2]);
+							console.log('this.history',this.history);
 							//检查当前玩家是否赢了游戏
 							for (var i = 0; i < 4; i++) {
 								this.checkWin(dx / 30 - 1, dy / 30 - 1, this.pieceColor[this.step % 2], this.checkMode[i]);
@@ -112,7 +112,9 @@
 						context.beginPath();
 						this.drawpieceBoard();
 						this.flag = false;
+						this.step= 0;
 					},
+					//
 					// 绘制棋盘
 					drawpieceBoard() {
 						let canvas = this.$refs.canvas
@@ -188,27 +190,32 @@
 							this.flag = true;
 						}
 					},
-					//悔棋:
-					//1.step--,2.
+					//悔棋:创建一个二维数组，下棋或者悔棋都操作这个数组。操作完数据，把画布全清，重新用数据画一个棋盘。
 					regret() {
 						if (this.history.length && !this.flag) {
-							const prev = this.history[this.step - 1];
-							console.log(prev)
-							if (prev) {
-								const {dx,dy,color} = prev;
-								// 销毁棋子
-								console.log(dx,dy,color)
-								this.minusStep(dx,dy);
-								// this.checkerboard[prev.x][prev.y] = 0
-								this.step--
-							}
+							// const prev = this.history[this.step - 1];							
+							this.history.pop(); //删除数组最后一项
+							//重画
+							let canvas = this.$refs.canvas;
+							let context = canvas.getContext("2d");
+							context.fillStyle = "bisque";
+							context.fillRect(0, 0, canvas.width, canvas.height);
+							context.beginPath();
+							this.drawpieceBoard();
+							this.history.forEach(e=>{
+								console.log('e',e)
+								this.drawPiece(e.dx, e.dy, e.color)
+							});
+							this.step--							
+						}else{
+							alert("不能悔棋！")
 						}
 					},
-					minusStep(x,y) {
-						let {that} = this;
-						console.log('that',that)
-						console.log(x,y)
+					//撤销悔棋
+					undo(){
+						
 					}
+					
 				}
 			});
 		</script>
