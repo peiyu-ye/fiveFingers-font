@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>简易五指棋</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+			}
+			#app{
+				padding: 10%;
+			}
+			#app h2{
+				/* text-align: center; */
+			}
+			/* .main{				
+				width: 600px;
+				height: 600px;
+				background-color: antiquewhite;
+			} */
+		</style>
+	</head>
+	<!-- 
+	 1.vue实现五指棋
+		空棋盘开局。
+			画网格：网格有 15 行 15 列，共有 225 个交叉点
+		黑先、白后，交替下子，每次只能下一子
+		胜负判定
+			按照简单的规则，从当前下子点位的八个方向判断()。如果有一个方向满足连续5个黑子或白子，游戏结束。
+	 2.支持dom和canvas切换
+	 3.实现悔棋功能
+	 4.实现撤销悔棋
+	 -->
+	<body>
+		<div id="app">
+			<h2>五指棋</h2>
+			<div class="Fbuttons">
+				<input type="button" value="重来" class="restart" @click="" />
+				<input type="button" value="悔棋" class="regret" @click="" />
+				<input type="button" value="撤销悔棋" class="undo" @click="" />
+				123
+			</div>
+			<div class="main">
+				<canvas class="line-canvas" id="canvas" ref="draw"></canvas>
+			</div>
+		</div>
+		<!--  -->
+		<script>
+			var app = new Vue({
+				el: "#app",
+				data: {
+
+				},
+				mounted() {
+					this.Draw();
+				},
+				methods: {					
+					// 画棋盘
+					Draw() {
+						var canvas = document.getElementById("canvas");
+						// 调用canvas元素的getContext 方法访问获取2d渲染的上下文
+						var context = canvas.getContext("2d");
+						context.strokeStyle = '#999999'											
+						for (let i = 0; i < 15; i++) {
+							context.moveTo(15 + i * 30, 15)
+							context.lineTo(15 + i * 30, 435)
+							context.stroke()
+							context.moveTo(15, 15 + i * 30)
+							context.lineTo(435, 15 + i * 30)
+							context.stroke()
+						}
+					}
+				}
+			});
+		</script>
+	</body>
+</html>
