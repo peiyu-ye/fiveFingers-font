@@ -13,13 +13,8 @@
 				padding: 10%;
 			}
 			#app h2{
-				/* text-align: center; */
 			}
-			/* .main{				
-				width: 600px;
-				height: 600px;
-				background-color: antiquewhite;
-			} */
+			
 		</style>
 	</head>
 	<!-- 
@@ -40,10 +35,9 @@
 				<input type="button" value="重来" class="restart" @click="" />
 				<input type="button" value="悔棋" class="regret" @click="" />
 				<input type="button" value="撤销悔棋" class="undo" @click="" />
-				123
 			</div>
 			<div class="main">
-				<canvas class="line-canvas" id="canvas" ref="draw"></canvas>
+				<canvas  ref="canvas" width="450" height="450"></canvas>
 			</div>
 		</div>
 		<!--  -->
@@ -51,18 +45,20 @@
 			var app = new Vue({
 				el: "#app",
 				data: {
-
+					chess: {},
+					context: {},
 				},
 				mounted() {
-					this.Draw();
+					this.drawChessBoard();
 				},
-				methods: {					
-					// 画棋盘
-					Draw() {
-						var canvas = document.getElementById("canvas");
+				methods: {
+					// 绘制棋盘
+					drawChessBoard() {
+						var canvas = this.$refs.canvas
 						// 调用canvas元素的getContext 方法访问获取2d渲染的上下文
 						var context = canvas.getContext("2d");
-						context.strokeStyle = '#999999'											
+						context.width = 450
+						context.strokeStyle = '#666'
 						for (let i = 0; i < 15; i++) {
 							context.moveTo(15 + i * 30, 15)
 							context.lineTo(15 + i * 30, 435)
@@ -71,7 +67,24 @@
 							context.lineTo(435, 15 + i * 30)
 							context.stroke()
 						}
-					}
+					},
+					// 画棋盘
+					// 					Draw() {
+					// 						var canvas = document.getElementById("canvas");
+					// 						// 调用canvas元素的getContext 方法访问获取2d渲染的上下文
+					// 						var context = canvas.getContext("2d");
+					// 						context.strokeStyle = '#666'
+					// 						for (let i = 0; i < 15; i++) {
+					// 							context.moveTo(15 + i * 30, 15)
+					// 							context.lineTo(15 + i * 30, 435)
+					// 							context.stroke()
+					// 							context.moveTo(15, 15 + i * 30)
+					// 							context.lineTo(435, 15 + i * 30)
+					// 							context.stroke()
+					// 						}
+					// 
+					// 					},
+
 				}
 			});
 		</script>
