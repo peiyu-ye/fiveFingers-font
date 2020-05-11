@@ -11,6 +11,7 @@
 			}
 			#app{
 				padding: 8%;
+				padding-left: 25%;
 			}
 			#app h3{
 				color: red;
@@ -21,6 +22,13 @@
 			.main{
 				background-color: bisque;
 				width: 30rem;
+			}
+			.restart,.regret,.undo{
+				background: bisque;
+				padding: 6px 10px;
+				border-radius: 6px;
+				font-size: 12px;
+				cursor: pointer;
 			}
 		</style>
 	</head>
@@ -65,6 +73,8 @@
 					flag: false,
 					victory: '',
 					history: [], //历史记录位置
+					historyVal: [], //历史记录不被删除数组
+					stepHistory: 0
 				},
 				mounted() {
 					this.drawpieceBoard();
@@ -91,9 +101,15 @@
 							this.history.push({
 								dx,
 								dy,
-								color: this.pieceColor[this.step % 2]								
+								color: this.pieceColor[this.step % 2]
 							});
-							console.log('this.history',this.history);
+							this.historyVal.push({
+								dx,
+								dy,
+								color: this.pieceColor[this.step % 2]
+							});
+							this.stepHistory++
+							console.log('this.history', this.history);
 							//检查当前玩家是否赢了游戏
 							for (var i = 0; i < 4; i++) {
 								this.checkWin(dx / 30 - 1, dy / 30 - 1, this.pieceColor[this.step % 2], this.checkMode[i]);
@@ -112,7 +128,10 @@
 						context.beginPath();
 						this.drawpieceBoard();
 						this.flag = false;
-						this.step= 0;
+						this.step = 0;
+						this.stepHistory = 0;
+						this.historyVal =[];
+						this.history= [];
 					},
 					//
 					// 绘制棋盘
@@ -193,8 +212,7 @@
 					//悔棋:创建一个二维数组，下棋或者悔棋都操作这个数组。操作完数据，把画布全清，重新用数据画一个棋盘。
 					regret() {
 						if (this.history.length && !this.flag) {
-							// const prev = this.history[this.step - 1];							
-							this.history.pop(); //删除数组最后一项
+							this.history.pop(); //删除数组最后一项							
 							//重画
 							let canvas = this.$refs.canvas;
 							let context = canvas.getContext("2d");
@@ -202,20 +220,30 @@
 							context.fillRect(0, 0, canvas.width, canvas.height);
 							context.beginPath();
 							this.drawpieceBoard();
-							this.history.forEach(e=>{
-								console.log('e',e)
+							this.history.forEach(e => {
 								this.drawPiece(e.dx, e.dy, e.color)
 							});
-							this.step--							
-						}else{
-							alert("不能悔棋！")
+							this.step--
+						} else {
+							alert("已经不能悔棋了~")
 						}
 					},
 					//撤销悔棋
-					undo(){
-						
+					undo() {
+						if ( (this.historyVal.length > this.history.length) && !this.flag ) {
+							// console.log(this.historyVal, this.history)
+							// console.log(this.stepHistory, this.step)
+							// console.log(this.historyVal[this.step])
+							this.history.push(this.historyVal[this.step])
+							this.history.forEach(e => {
+								this.drawPiece(e.dx, e.dy, e.color)
+							});
+							this.step++
+						}else{
+							console.log("撤销悔棋,最后一步了")
+						}
 					}
-					
+
 				}
 			});
 		</script>
