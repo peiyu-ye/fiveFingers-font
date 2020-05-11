@@ -10,8 +10,11 @@
 				padding: 0;
 			}
 			#app{
-				padding: 8%;
-				padding-left: 25%;
+				padding-left: 30%;
+				width: 500px;
+			}
+			.h2Title{
+				text-align: center;
 			}
 			#app h3{
 				color: red;
@@ -45,7 +48,7 @@
 	 -->
 	<body>
 		<div id="app">
-			<h2>五指棋</h2>
+			<h2 class="h2Title">五指棋</h2>
 			<h3>{{victory}}</h3>
 			<div class="Fbuttons">
 				<input type="button" value="重来" class="restart" @click="restartInit()" />
