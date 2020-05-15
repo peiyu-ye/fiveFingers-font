@@ -42,7 +42,7 @@
 		黑先、白后，交替下子，每次只能下一子
 		胜负判定
 			按照简单的规则，从当前下子点位的八个方向判断()。如果有一个方向满足连续5个黑子或白子，游戏结束。
-	 2.支持dom和canvas切换
+	 2.支持dom和canvas切换 
 	 3.实现悔棋功能
 	 4.实现撤销悔棋
 	 -->
@@ -58,9 +58,10 @@
 			<div class="main">
 				<canvas ref="canvas" width="480" height="480"></canvas>
 			</div>
+			
 		</div>
 		<!--  -->
-		<script>
+		<script>			
 			var app = new Vue({
 				el: "#app",
 				data: {
@@ -80,6 +81,7 @@
 					stepHistory: 0
 				},
 				mounted() {
+					
 					this.drawpieceBoard();
 					const canvas = this.$refs.canvas;
 					// 添加点击监听事件 
@@ -94,7 +96,7 @@
 						}
 						let dx = Math.floor((e.offsetX + 15) / 30) * 30;
 						let dy = Math.floor((e.offsetY + 15) / 30) * 30;
-						//console.log('this.pieceMapArr', this.pieceMapArr)
+						console.log('this.pieceMapArr 数组', this.pieceMapArr)
 						if (this.pieceMapArr[dx / 30 - 1][dy / 30 - 1] == 0) {
 							console.log('落下棋子', dx, dy, this.pieceColor[this.step % 2])
 							this.drawPiece(dx, dy, this.pieceColor[this.step % 2]); //落下棋子
@@ -118,6 +120,8 @@
 								this.checkWin(dx / 30 - 1, dy / 30 - 1, this.pieceColor[this.step % 2], this.checkMode[i]);
 							}
 							this.step++;
+						}else{
+							alert("不能落在有棋子的地方！");
 						}
 					});
 				},
@@ -129,6 +133,7 @@
 						context.fillStyle = "bisque";
 						context.fillRect(0, 0, canvas.width, canvas.height);
 						context.beginPath();
+						context.closePath();
 						this.drawpieceBoard();
 						this.flag = false;
 						this.step = 0;
@@ -139,6 +144,14 @@
 					//
 					// 绘制棋盘
 					drawpieceBoard() {
+						//初始化棋盘数组
+						for (let i = 0; i < 15; i++) {
+							this.pieceMapArr[i] = [];
+							for (let j = 0; j < 15; j++) {
+								this.pieceMapArr[i][j] = 0;
+							}
+						}
+						//canvas 绘制
 						let canvas = this.$refs.canvas
 						// 调用canvas元素的getContext 方法访问获取2d渲染的上下文
 						let context = canvas.getContext("2d");
@@ -162,14 +175,7 @@
 							context.lineTo(canvas.width - 30, (i + 1) * 30);
 							context.closePath();
 							context.stroke();
-						}
-						//初始化棋盘数组
-						for (let i = 0; i < 15; i++) {
-							this.pieceMapArr[i] = [];
-							for (let j = 0; j < 15; j++) {
-								this.pieceMapArr[i][j] = 0;
-							}
-						}
+						}						
 					},
 					//绘制棋子
 					drawPiece(x, y, color) {
@@ -222,9 +228,13 @@
 							context.fillStyle = "bisque";
 							context.fillRect(0, 0, canvas.width, canvas.height);
 							context.beginPath();
+							context.closePath();
+							// 绘制棋盘
 							this.drawpieceBoard();
+							//绘制棋子
 							this.history.forEach(e => {
 								this.drawPiece(e.dx, e.dy, e.color)
+								this.pieceMapArr[e.dx / 30 - 1][e.dy / 30 - 1] = e.color;
 							});
 							this.step--
 						} else {
@@ -234,12 +244,19 @@
 					//撤销悔棋
 					undo() {
 						if ( (this.historyVal.length > this.history.length) && !this.flag ) {
-							// console.log(this.historyVal, this.history)
-							// console.log(this.stepHistory, this.step)
-							// console.log(this.historyVal[this.step])
 							this.history.push(this.historyVal[this.step])
+							//重画
+							let canvas = this.$refs.canvas;
+							let context = canvas.getContext("2d");
+							context.fillStyle = "bisque";
+							context.fillRect(0, 0, canvas.width, canvas.height);
+							context.beginPath();
+							context.closePath();
+							// 绘制棋盘
+							this.drawpieceBoard();
 							this.history.forEach(e => {
 								this.drawPiece(e.dx, e.dy, e.color)
+								this.pieceMapArr[e.dx / 30 - 1][e.dy / 30 - 1] = e.color;
 							});
 							this.step++
 						}else{
