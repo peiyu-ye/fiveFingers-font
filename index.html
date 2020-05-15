@@ -45,13 +45,14 @@
 	 2.支持dom和canvas切换 
 	 3.实现悔棋功能
 	 4.实现撤销悔棋
+		
 	 -->
 	<body>
 		<div id="app">
 			<h2 class="h2Title">五指棋</h2>
 			<h3>{{victory}}</h3>
 			<div class="Fbuttons">
-				<input type="button" value="重来" class="restart" @click="restartInit()" />
+				<input type="button" value="重新开始" class="restart" @click="restartInit()" />
 				<input type="button" value="悔棋" class="regret" @click="regret()" />
 				<input type="button" value="撤销悔棋" class="undo" @click="undo()" />
 			</div>
@@ -80,8 +81,7 @@
 					historyVal: [], //历史记录不被删除数组
 					stepHistory: 0
 				},
-				mounted() {
-					
+				mounted() {					
 					this.drawpieceBoard();
 					const canvas = this.$refs.canvas;
 					// 添加点击监听事件 
@@ -101,6 +101,7 @@
 							console.log('落下棋子', dx, dy, this.pieceColor[this.step % 2])
 							this.drawPiece(dx, dy, this.pieceColor[this.step % 2]); //落下棋子
 							this.pieceMapArr[dx / 30 - 1][dy / 30 - 1] = this.pieceColor[this.step % 2];
+							
 							//历史记录位置
 							this.history.length = this.step;
 							this.history.push({
@@ -128,12 +129,9 @@
 				methods: {
 					//重来
 					restartInit() {
-						let canvas = this.$refs.canvas
-						let context = canvas.getContext("2d");
-						context.fillStyle = "bisque";
-						context.fillRect(0, 0, canvas.width, canvas.height);
-						context.beginPath();
-						context.closePath();
+						//重画
+						this.repaint();
+						// 绘制棋盘
 						this.drawpieceBoard();
 						this.flag = false;
 						this.step = 0;
@@ -141,7 +139,6 @@
 						this.historyVal =[];
 						this.history= [];
 					},
-					//
 					// 绘制棋盘
 					drawpieceBoard() {
 						//初始化棋盘数组
@@ -218,17 +215,22 @@
 							this.flag = true;
 						}
 					},
+					//重画
+					repaint(){
+						//重画
+						let canvas = this.$refs.canvas;
+						let context = canvas.getContext("2d");
+						context.fillStyle = "bisque";
+						context.fillRect(0, 0, canvas.width, canvas.height);
+						context.beginPath();
+						context.closePath();
+					},
 					//悔棋:创建一个二维数组，下棋或者悔棋都操作这个数组。操作完数据，把画布全清，重新用数据画一个棋盘。
 					regret() {
 						if (this.history.length && !this.flag) {
 							this.history.pop(); //删除数组最后一项							
 							//重画
-							let canvas = this.$refs.canvas;
-							let context = canvas.getContext("2d");
-							context.fillStyle = "bisque";
-							context.fillRect(0, 0, canvas.width, canvas.height);
-							context.beginPath();
-							context.closePath();
+							this.repaint();
 							// 绘制棋盘
 							this.drawpieceBoard();
 							//绘制棋子
@@ -246,12 +248,7 @@
 						if ( (this.historyVal.length > this.history.length) && !this.flag ) {
 							this.history.push(this.historyVal[this.step])
 							//重画
-							let canvas = this.$refs.canvas;
-							let context = canvas.getContext("2d");
-							context.fillStyle = "bisque";
-							context.fillRect(0, 0, canvas.width, canvas.height);
-							context.beginPath();
-							context.closePath();
+							this.repaint();
 							// 绘制棋盘
 							this.drawpieceBoard();
 							this.history.forEach(e => {
