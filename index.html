@@ -138,7 +138,7 @@
 					domPiece:[], //
 					toggle: true //true为canvas,false为dom
 				},
-				mounted() {
+				mounted(){
 					const myCanvas = document.getElementById("myCanvas");
 					if (!myCanvas.getContext) {
 						alert("当前浏览器不支持Canvas.");
@@ -223,11 +223,12 @@
 					//重新开始
 					restartInit() {
 						if (!this.toggle) {
-							console.log("-----dom-------")
-							let elem = document.getElementById('box01');
-							if (elem !== null) {
+							// console.log("-----dom-------")
+							var elem = document.querySelector('#box01');
+							// console.log("elem",elem)
+							if (elem != null ) {
 								elem.parentNode.removeChild(elem);
-								let elem02 = document.getElementById('box02');
+								let elem02 = document.querySelector('#box02');
 								elem02.parentNode.removeChild(elem02);
 							}
 							this.drawpieceBoardDom();
@@ -437,19 +438,19 @@
 						const box = document.querySelector("#chess");
 						const box01 = document.createElement("div");
 						box01.setAttribute("id", "box01");
-						box.append(box01);
+						box.appendChild(box01);
 						//画棋盘
 						const chess01 = document.querySelector("#box01");
 						const box02 = document.createElement("div");
 						box02.setAttribute("id", "box02");
-						box.append(box02);
+						box.appendChild(box02);
 						let arr = new Array();
 						for (let i = 0; i < 14; i++) {
 							arr[i] = new Array();
 							for (let j = 0; j < 14; j++) {
 								arr[i][j] = document.createElement("div");
 								arr[i][j].setAttribute("class", "squre");
-								box02.append(arr[i][j]);
+								box02.appendChild(arr[i][j]);
 							}
 						}
 						//画棋子
@@ -459,7 +460,7 @@
 							for (let j = 0; j < 15; j++) {
 								arr01[i][j] = document.createElement("div");
 								arr01[i][j].setAttribute("class", "qz");
-								chess01.append(arr01[i][j]);
+								chess01.appendChild(arr01[i][j]);
 							}
 						}
 						// console.log("this.domPiece",this.domPiece)
